@@ -29,6 +29,5 @@ public class ProductDTO {
             )
             String
         > imageUrls;
-
     private Category category;
 }

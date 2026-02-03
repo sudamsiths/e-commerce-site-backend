@@ -27,10 +27,6 @@ public class ProductEntity {
     private Integer stockQuantity;
 
     @ElementCollection
-    @CollectionTable(
-            name = "product_images",
-            joinColumns = @JoinColumn(name = "product_id")
-    )
     @Column(name = "image_url", length = 500)
     private List<String> imageUrls;
     @Enumerated(EnumType.STRING)
