@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 
 @Service
@@ -23,29 +24,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void createUser(UserDTO userDTO) {
-        try{
-            userRepository.findByUsername(userDTO.getUsername()).ifPresent(u -> {
-                throw new RuntimeException("Username already exists");
-            });
-            userRepository.findByEmail(userDTO.getEmail()).ifPresent(u -> {
-                throw new RuntimeException("Email already exists");
-            });
-            boolean equals = userDTO.getPassword().equals(userDTO.getConfirmPassword());
-
-            if (!equals){
-                throw new RuntimeException("Passwords do not match");
-            }else {
-                String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
-                userDTO.setPassword(encodedPassword);
-                String encodedConformPassword = passwordEncoder.encode(userDTO.getConfirmPassword());
-                userDTO.setPassword(encodedConformPassword);
-                userDTO.setRole(Role.CUSTOMER);
-                UserEntity save = modelMapper.map(userDTO, UserEntity.class);
-                userRepository.save(save);
-            }
-        } catch (Exception e){
-            throw new RuntimeException("Error creating user: " + e.getMessage());
+        if (userDTO == null) {
+            throw new RuntimeException("User data is required");
         }
+        if (userDTO.getUsername() == null || userDTO.getEmail() == null) {
+            throw new RuntimeException("Username and email are required");
+        }
+
+        userRepository.findByUsername(userDTO.getUsername()).ifPresent(u -> {
+            throw new RuntimeException("Username already exists");
+        });
+        userRepository.findByEmail(userDTO.getEmail()).ifPresent(u -> {
+            throw new RuntimeException("Email already exists");
+        });
+
+        if (!Objects.equals(userDTO.getPassword(), userDTO.getConfirmPassword())) {
+            throw new RuntimeException("Passwords do not match or are null");
+        }
+
+        String encoded = passwordEncoder.encode(userDTO.getPassword());
+        userDTO.setPassword(encoded);
+        userDTO.setConfirmPassword(null); // don't store confirm password
+        userDTO.setRole(Role.CUSTOMER);
+
+        UserEntity save = modelMapper.map(userDTO, UserEntity.class);
+        userRepository.save(save);
     }
 
     @Override
@@ -55,4 +58,20 @@ public class UserServiceImpl implements UserService {
                 .map(userEntity -> modelMapper.map(userEntity, UserDTO.class))
                 .toList();
     }
+
+   @Override
+    public String signIn(String email, String password) {
+    if (email == null || password == null || email.trim().isEmpty() || password.trim().isEmpty()) {
+        throw new IllegalArgumentException("Email and password are required");
+    }
+
+    UserEntity userEntity = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+
+    if (!passwordEncoder.matches(password, userEntity.getPassword())) {
+        throw new RuntimeException("Invalid email or password");
+    }
+
+    return "User signed in successfully";
+}
 }

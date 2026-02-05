@@ -9,4 +9,6 @@ public interface UserService {
     void createUser(UserDTO userDTO);
 
     List<UserDTO> getAllUsers();
+
+    String signIn(String email, String password);
 }

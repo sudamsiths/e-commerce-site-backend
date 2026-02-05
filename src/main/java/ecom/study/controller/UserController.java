@@ -30,4 +30,10 @@ public class UserController {
         List<UserDTO> userDTOS = userService.getAllUsers();
         return ResponseEntity.ok(userDTOS);
     }
+
+    @PostMapping("/signIn")
+    public ResponseEntity<String> signIn(@RequestBody UserDTO userDTO){
+     String message = userService.signIn(userDTO.getEmail(), userDTO.getPassword());
+    return ResponseEntity.ok(message);
+}
 }
