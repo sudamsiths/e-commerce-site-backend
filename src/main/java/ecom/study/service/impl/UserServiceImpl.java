@@ -10,6 +10,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +37,8 @@ public class UserServiceImpl implements UserService {
             }else {
                 String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
                 userDTO.setPassword(encodedPassword);
+                String encodedConformPassword = passwordEncoder.encode(userDTO.getConfirmPassword());
+                userDTO.setPassword(encodedConformPassword);
                 userDTO.setRole(Role.CUSTOMER);
                 UserEntity save = modelMapper.map(userDTO, UserEntity.class);
                 userRepository.save(save);
@@ -42,5 +46,13 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e){
             throw new RuntimeException("Error creating user: " + e.getMessage());
         }
+    }
+
+    @Override
+    public List<UserDTO> getAllUsers() {
+        List<UserEntity> userEntities = userRepository.findAll();
+        return userEntities.stream()
+                .map(userEntity -> modelMapper.map(userEntity, UserDTO.class))
+                .toList();
     }
 }
