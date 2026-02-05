@@ -28,11 +28,17 @@ public class UserServiceImpl implements UserService {
             userRepository.findByEmail(userDTO.getEmail()).ifPresent(u -> {
                 throw new RuntimeException("Email already exists");
             });
-            String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
-            userDTO.setPassword(encodedPassword);
-            userDTO.setRole(Role.CUSTOMER);
-            UserEntity save = modelMapper.map(userDTO, UserEntity.class);
-            userRepository.save(save);
+            boolean equals = userDTO.getPassword().equals(userDTO.getConfirmPassword());
+
+            if (!equals){
+                throw new RuntimeException("Passwords do not match");
+            }else {
+                String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
+                userDTO.setPassword(encodedPassword);
+                userDTO.setRole(Role.CUSTOMER);
+                UserEntity save = modelMapper.map(userDTO, UserEntity.class);
+                userRepository.save(save);
+            }
         } catch (Exception e){
             throw new RuntimeException("Error creating user: " + e.getMessage());
         }
