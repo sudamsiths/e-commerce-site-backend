@@ -25,7 +25,6 @@ public class ProductEntity {
     private String description;
     private Double price;
     private Integer stockQuantity;
-
     @ElementCollection
     @Column(name = "image_url", length = 500)
     private List<String> imageUrls;

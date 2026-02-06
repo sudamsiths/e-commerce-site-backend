@@ -1,8 +1,6 @@
 package ecom.study.controller;
 
-
 import ecom.study.model.dto.ProductDTO;
-import ecom.study.model.entity.ProductEntity;
 import ecom.study.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +25,23 @@ public class ProductController {
        return ResponseEntity.ok(products);
    }
 
-    @PostMapping("/add")
+    @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> addProduct(
-        @Valid @RequestBody ProductDTO productDTO) {
-        productService.addProduct(productDTO);
+            @RequestParam("name") String name,
+            @RequestParam("description") String description,
+            @RequestParam("price") Double price,
+            @RequestParam("stockQuantity") Integer stockQuantity,
+            @RequestParam("category") String category,
+            @RequestParam("images") List<MultipartFile> images) {
+
+        ProductDTO productDTO = new ProductDTO();
+        productDTO.setName(name);
+        productDTO.setDescription(description);
+        productDTO.setPrice(price);
+        productDTO.setStockQuantity(stockQuantity);
+        productDTO.setCategory(ecom.study.model.enums.Category.valueOf(category));
+
+        productService.addProduct(productDTO, images);
         return ResponseEntity.ok().build();
     }
-
 }
